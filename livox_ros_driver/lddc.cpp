@@ -338,6 +338,9 @@ uint32_t Lddc::PublishCustomPointcloud(LidarDataQueue *queue,
     }
 
     timestamp = GetStoragePacketTimestamp(&storage_packet, data_source);
+    if (!published_packet) {
+        livox_msg.header.stamp = ros::Time::now();
+    }
     if (((timestamp - last_timestamp) > kDeviceDisconnectThreshold) &&
         published_packet && lds_->lidars_[handle].data_is_pubulished) {
       ROS_INFO("Lidar[%d] packet loss", handle);
@@ -346,8 +349,7 @@ uint32_t Lddc::PublishCustomPointcloud(LidarDataQueue *queue,
     if (!published_packet) {
       livox_msg.timebase = timestamp; // to us
       packet_offset_time = 0;         // first packet
-      livox_msg.header.stamp =
-          ros::Time(timestamp / 1000000000.0); // to ros time stamp
+      // livox_msg.header.stamp = ros::Time(timestamp / 1000000000.0); // to ros time stamp
       // ROS_DEBUG("[%d]:%ld %d", handle, livox_msg.timebase, point_interval);
     } else {
       packet_offset_time = (uint32_t)(timestamp - livox_msg.timebase);
